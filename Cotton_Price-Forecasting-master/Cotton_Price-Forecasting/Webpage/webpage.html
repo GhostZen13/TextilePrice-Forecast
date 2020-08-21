@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html>
+   <head>
+      <meta http-equiv = "Content-Type" content = "text/html; charset = utf-8" />
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js" ></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+      <script type= "text/javascript">
+    
+      	 window.indexedDB = window.indexedDB || window.mozIndexedDB || 
+        window.webkitIndexedDB || window.msIndexedDB;
+         window.IDBTransaction = window.IDBTransaction || 
+         window.webkitIDBTransaction || window.msIDBTransaction;
+         window.IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || 
+         window.msIDBKeyRange
+         
+         if (!window.indexedDB) {
+            window.alert("Your browser doesn't support a stable version of IndexedDB.")
+         }
+         else
+         {
+         	console.log("Browser supports IndexDB");
+         }
+         var prices = [
+         { id: "01" , year : "2019", month :"Jan" , price : 5365},
+         { id: "02" , year : "2019", month :"Feb" , price :5325},
+         { id : "03" , year : "2019", month :"March", price : 5562},
+         { id : "04", year : "2019", month : "April", price :5725},
+         { id: "05", year :"2019", month :"May", price : 5456}
+         ];
+         console.log(prices);
+
+         var db;
+         var request = window.indexedDB.open("newDatabase", 1);
+         request.onerror = function(event) {
+            console.log("error: ");
+         };
+         
+         request.onsuccess = function(event) {
+            db = request.result;
+            console.log("success: "+ db);
+            var mydb = db.version;
+            console.log(mydb);
+            alert("Database Load succesful !");
+         };
+
+          request.onupgradeneeded = function(event) {
+            var db = event.target.result;
+            var objectStore = db.createObjectStore("prices", {keyPath: "id"});
+            for (var i in prices) {
+               objectStore.add(prices[i]);
+            }
+         }
+          function read() {
+            var transaction = db.transaction(["prices"]);
+            var objectStore = transaction.objectStore("prices");
+            var request = objectStore.get("03");
+            
+            request.onerror = function(event) {
+               alert("Unable to retrieve daa from database!");
+            };
+            
+            request.onsuccess = function(event) {
+               // Do something with the request.result!
+               if(request.result) {
+                  alert("Month :" + request.result.month +"&" + "Year :"+request.result.year +"\n"+"Price :" + request.result.price);
+               } else {
+                  alert("Entry couldn't be found in your database!");
+               }
+            };
+         }
+         function readAll(arr) {
+            var objectStore = db.transaction("prices").objectStore("prices");
+            var priceArr =[];
+            
+            objectStore.openCursor().onsuccess = function(event) {
+               var cursor = event.target.result;
+               
+               if (cursor) {
+                  alert("Month :" + cursor.value.month + "&" +"Year :" + cursor.value.year +"\n" + "Price - " + cursor.value.price);
+                  priceArr.push(cursor.value.price)
+                  cursor.continue();
+                  console.log(priceArr);
+               } else {
+                  alert("No more entries!");
+               }
+            };
+         }
+         function add() {
+            var request = db.transaction(["prices"], "readwrite")
+            .objectStore("prices")
+            .add({ id: "04", year :"2019", month :"June", price :"5545"});
+            
+            request.onsuccess = function(event) {
+               alert("Entry has been added to your database.");
+            };
+            
+            request.onerror = function(event) {
+               alert("Unable to add data\r\nEntry is aready exist in your database! ");
+            }
+         }
+          function remove() {
+            var request = db.transaction(["prices"], "readwrite")
+            .objectStore("prices")
+            .delete("03");
+            
+            request.onsuccess = function(event) {
+               alert("Entry has been removed from your database.");
+            };
+         }
+      </script>
+      <script>
+          $(document).ready(function(){
+        $('#load_data').click(function(){
+           $.ajax({
+          url:"forecast.csv",
+          dataType:"text",
+           success:function(data)
+              {
+                 var employee_data = data.split(/\r?\n|\r/);
+                var table_data = '<table class="table table-bordered table-striped"  border="1" width="1000">';
+                for(var count = 0; count<employee_data.length; count++)
+               {
+                 var cell_data = employee_data[count].split(",");
+                table_data += '<tr>';
+                     for(var cell_count=0; cell_count<cell_data.length; cell_count++)
+                   {
+                   if(count === 0)
+                        {
+                         table_data += '<th>'+cell_data[cell_count]+'</th>';
+                           }
+                             else
+                            {
+                             table_data += '<td>'+cell_data[cell_count]+'</td>';
+                                }
+                                 }
+                               table_data += '</tr>';
+                                   }
+                            table_data += '</table>';
+                            $('#employee_table').html(table_data);
+                               }
+                               });
+                               });
+ 
+                               });
+</script>
+ <script type = "text/javascript">
+         function picture(){
+         document.getElementById('bigpic').style.display='block';
+     }
+        </script>
+    </head>
+    <div style="background-image: url(https://www.android-examples.com/wp-content/uploads/2016/03/demo_bg_image.jpg); background-size: 100% 100%;">
+       <body>
+	<title>Cotton Price Forecast</title>
+	<center>
+    <h1 style="color:black;">Cotton Price Forecasting</h1>
+    <img src="welcomepage.gif" alt="settings" width="250" height="80" align="middle"><br>
+    <img src="setting-icon-gif-11.gif" alt="settings" width="68" height="30" align="right">
+    <img src="search.gif" alt="settings" width="68" height="30" align="right">
+   <br><br>
+	</center>
+     <form>
+       <fieldset>
+          <p>
+             <label>Select the Commodity</label>
+             <select id = "myListcommodity">
+               <option value = "1">Cotton</option>
+             </select>
+             <br><br>
+             <label>Select Year & Month</label>
+             <select id = "mylistyear">
+             	<option value = "1">Jan 2019</option>
+             	<option value ="2">Feb 2019</option>
+             	<option value = "3">March 2019</option>
+             	<option value = "4">April 2019</option>
+             	<option value = "5">May 2019</option>
+             	<option value = "6">June 2019</option>
+             	<option value = "7">July 2019</option>
+             	<option value = "8">August 2019</option>
+             	<option value = "9">September 2019</option>
+             	<option value = "10">October 2019</option>
+             	<option value = "11">November 2019</option>
+             	<option value = "12">December 2019</option>
+           </select>
+            Enter Region here :-
+              <input id="region" name="mytext" type="text">
+          </p>
+       </fieldset>
+    </form>
+    <br><br>
+    <center>
+      <button onclick = "read()">Read </button>
+      <button onclick = "readAll()">Display</button>
+      <button onclick = "add()">Add New Data</button>
+      <button onclick = "remove()">Delete data </button>
+      <br><br>
+       <button onclick = "picture()" id="forecast">Forecast</button>
+     <button type="button" name="load_data" id="load_data" class="btn btn-info">Load Data</button>
+    <br><br>
+      <center>
+<img id="bigpic" img src="Rplot.JPEG" style="display:none;"/>
+</center>
+<br>
+<br>
+       <form>
+   <fieldset id ="tableoutput">
+          <p>
+            <label style="color:black;">Forecast Table</label>
+             <div class="container">
+               <div class="table-responsive">
+  
+                      <br />
+                <div align="center">
+                  </div>
+                    <br />
+                <div id="employee_table">
+                    </div>
+                       </div>
+                   </div>
+          </p>
+        </fieldset>
+</form>
+     <br>
+      <div id=container>
+</div>
+   </form>
+   <br>
+   <button  onclick="window.location.href = 'http://sinatrarb.com/';">Submit</button>
+    <button  id="reset">Reset</button>
+                  </center>
+</body>
+</div> 
+</html>
